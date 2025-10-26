@@ -1,0 +1,424 @@
+{% extends 'members/base.html' %}
+
+{% block title %}Paramètres de l'Église{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+    <!-- En-tête -->
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 flex items-center">
+                <i class="fas fa-cog mr-2" style="color: {{ settings.primary_color|default:'#4F46E5' }};"></i>
+                Paramètres de l'Église
+            </h1>
+            <p class="text-gray-600 mt-1">Gérez les informations et la personnalisation de votre église</p>
+        </div>
+        <div class="flex space-x-4">
+            {% if request.user.is_authenticated and request.user.has_admin_access %}
+                <a href="{% url 'settings:update' %}" class="bg-{{ settings.primary_color|default:'indigo-600' }} text-shadow-black px-4 py-2 rounded-lg hover:bg-opacity-90 transition duration-200 flex items-center">
+                    <i class="fas fa-edit mr-2"></i> Modifier les Paramètres
+                </a>
+                <a href="{% url 'settings:theme_gallery' %}" class="bg-{{ settings.secondary_color|default:'purple-600' }} text-shadow-black px-4 py-2 rounded-lg hover:bg-opacity-90 transition duration-200 flex items-center">
+                    <i class="fas fa-th mr-2"></i> Galerie de Thèmes
+                </a>
+            {% else %}
+                <p class="text-red-500">Accès restreint : Connectez-vous avec un compte administrateur.</p>
+            {% endif %}
+        </div>
+    </div>
+    </div>
+
+    <!-- Statistiques -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition duration-200">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-12 h-12 bg-{{ settings.primary_color|default:'indigo-100' }} text-{{ settings.primary_color|default:'indigo-600' }} rounded-full flex items-center justify-center">
+                        <i class="fas fa-church"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <h6 class="text-sm font-medium text-gray-700">Nom de l'Église</h6>
+                    <p class="text-gray-500 text-sm">{{ settings.church_name }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition duration-200">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-12 h-12 bg-{{ settings.success_color|default:'green-100' }} text-{{ settings.success_color|default:'green-600' }} rounded-full flex items-center justify-center">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <h6 class="text-sm font-medium text-gray-700">Fondée en</h6>
+                    <p class="text-gray-500 text-sm">
+                        {% if settings.founded_date %}{{ settings.founded_date|date:"Y" }}{% else %}Non définie{% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition duration-200">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-12 h-12 bg-{{ settings.accent_color|default:'yellow-100' }} text-{{ settings.accent_color|default:'yellow-600' }} rounded-full flex items-center justify-center">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <h6 class="text-sm font-medium text-gray-700">Pasteur Principal</h6>
+                    <p class="text-gray-500 text-sm">
+                        {% if settings.current_pastor %}{{ settings.current_pastor }}{% else %}Non défini{% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition duration-200">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-12 h-12 bg-{{ settings.secondary_color|default:'purple-100' }} text-{{ settings.secondary_color|default:'purple-600' }} rounded-full flex items-center justify-center">
+                        <i class="fas fa-palette"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <h6 class="text-sm font-medium text-gray-700">Thème</h6>
+                    <div class="flex gap-2 mt-1">
+                        <span class="w-4 h-4 rounded-full" style="background-color: {{ settings.primary_color }};"></span>
+                        <span class="w-4 h-4 rounded-full" style="background-color: {{ settings.secondary_color }};"></span>
+                        <span class="w-4 h-4 rounded-full" style="background-color: {{ settings.accent_color }};"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs de Navigation -->
+    <div class="border-b mb-6">
+        <nav class="flex space-x-6" aria-label="Tabs">
+            <button type="button" class="tab-active:text-{{ settings.primary_color|default:'indigo-600' }} border-b-2 border-{{ settings.primary_color|default:'indigo-600' }} pb-2 text-sm font-medium text-gray-700 hover:text-{{ settings.primary_color|default:'indigo-600' }} focus:outline-none" data-tab="info">
+                <i class="fas fa-info-circle mr-1"></i> Informations
+            </button>
+            <button type="button" class="tab-default:text-gray-500 border-b-2 border-transparent pb-2 text-sm font-medium hover:text-gray-700 focus:outline-none" data-tab="media">
+                <i class="fas fa-images mr-1"></i> Médias
+            </button>
+            <button type="button" class="tab-default:text-gray-500 border-b-2 border-transparent pb-2 text-sm font-medium hover:text-gray-700 focus:outline-none" data-tab="contact">
+                <i class="fas fa-address-book mr-1"></i> Contact
+            </button>
+            <button type="button" class="tab-default:text-gray-500 border-b-2 border-transparent pb-2 text-sm font-medium hover:text-gray-700 focus:outline-none" data-tab="theme">
+                <i class="fas fa-palette mr-1"></i> Personnalisation
+            </button>
+            <button type="button" class="tab-default:text-gray-500 border-b-2 border-transparent pb-2 text-sm font-medium hover:text-gray-700 focus:outline-none" data-tab="schedule">
+                <i class="fas fa-clock mr-1"></i> Horaires
+            </button>
+        </nav>
+    </div>
+
+    <!-- Contenu des Tabs -->
+    <div class="tab-content">
+        <!-- Informations -->
+        <div class="tab-panel active" id="info" role="tabpanel">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                        <h5 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                            <i class="fas fa-info-circle mr-2" style="color: {{ settings.primary_color|default:'#4F46E5' }};"></i>
+                            Informations Générales
+                        </h5>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><span class="font-medium text-gray-700">Nom de l'Église:</span> {{ settings.church_name }}</div>
+                            <div><span class="font-medium text-gray-700">Slogan/Devise:</span> {{ settings.slogan|default:"—" }}</div>
+                            <div><span class="font-medium text-gray-700">Date de Fondation:</span> {{ settings.founded_date|date:"d/m/Y"|default:"—" }}</div>
+                            <div><span class="font-medium text-gray-700">Pasteur Principal:</span> {{ settings.current_pastor|default:"—" }}</div>
+                            <div><span class="font-medium text-gray-700">En poste depuis:</span> {{ settings.pastor_since|date:"d/m/Y"|default:"—" }}</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h5 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                            <i class="fas fa-book mr-2" style="color: {{ settings.secondary_color|default:'#7C3AED' }};"></i>
+                            Vision & Mission
+                        </h5>
+                        <div class="space-y-4">
+                            <div>
+                                <h6 class="text-{{ settings.primary_color|default:'indigo-600' }} font-medium">Vision</h6>
+                                <p class="text-gray-600">{{ settings.vision|default:"Non définie"|linebreaks }}</p>
+                            </div>
+                            <div>
+                                <h6 class="text-{{ settings.primary_color|default:'indigo-600' }} font-medium">Mission</h6>
+                                <p class="text-gray-600">{{ settings.mission|default:"Non définie"|linebreaks }}</p>
+                            </div>
+                            <div>
+                                <h6 class="text-{{ settings.primary_color|default:'indigo-600' }} font-medium">Valeurs Fondamentales</h6>
+                                <p class="text-gray-600">{{ settings.core_values|default:"Non définies"|linebreaks }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                        <h5 class="text-lg font-semibold text-gray-900 mb-4 flex items-center justify-center">
+                            <i class="fas fa-user-tie mr-2" style="color: {{ settings.accent_color|default:'#F59E0B' }};"></i>
+                            Pasteur Principal
+                        </h5>
+                        {% if settings.pastor_photo %}
+                            <img src="{{ settings.pastor_photo.url }}" alt="{{ settings.current_pastor }}" class="w-32 h-32 rounded-full mx-auto mb-4 object-cover">
+                        {% else %}
+                            <div class="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-user fa-3x text-gray-400"></i>
+                            </div>
+                        {% endif %}
+                        <h6 class="text-gray-900 font-medium">{{ settings.current_pastor|default:"Non défini" }}</h6>
+                        {% if settings.pastor_bio %}
+                            <p class="text-gray-600 text-sm mt-2">{{ settings.pastor_bio|truncatewords:30 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Médias -->
+        <div class="tab-panel" id="media" role="tabpanel">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                    <h5 class="text-lg font-semibold text-gray-900 mb-4 flex items-center justify-center">
+                        <i class="fas fa-church mr-2" style="color: {{ settings.primary_color|default:'#4F46E5' }};"></i>
+                        Logo
+                    </h5>
+                    {% if settings.logo %}
+                        <img src="{{ settings.logo.url }}" alt="Logo" class="w-full h-48 object-cover rounded-lg">
+                    {% else %}
+                        <div class="bg-gray-200 rounded-lg p-12 flex items-center justify-center">
+                            <i class="fas fa-image fa-3x text-gray-400"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                    <h5 class="text-lg font-semibold text-gray-900 mb-4 flex items-center justify-center">
+                        <i class="fas fa-globe mr-2" style="color: {{ settings.secondary_color|default:'#7C3AED' }};"></i>
+                        Favicon
+                    </h5>
+                    {% if settings.favicon %}
+                        <img src="{{ settings.favicon.url }}" alt="Favicon" class="w-24 h-24 mx-auto rounded">
+                    {% else %}
+                        <div class="bg-gray-200 rounded-lg p-12 flex items-center justify-center">
+                            <i class="fas fa-globe fa-3x text-gray-400"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                    <h5 class="text-lg font-semibold text-gray-900 mb-4 flex items-center justify-center">
+                        <i class="fas fa-image mr-2" style="color: {{ settings.accent_color|default:'#F59E0B' }};"></i>
+                        Bannière
+                    </h5>
+                    {% if settings.banner %}
+                        <img src="{{ settings.banner.url }}" alt="Bannière" class="w-full h-48 object-cover rounded-lg">
+                    {% else %}
+                        <div class="bg-gray-200 rounded-lg p-12 flex items-center justify-center">
+                            <i class="fas fa-panorama fa-3x text-gray-400"></i>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact -->
+        <div class="tab-panel" id="contact" role="tabpanel">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h5 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-phone mr-2" style="color: {{ settings.primary_color|default:'#4F46E5' }};"></i>
+                        Coordonnées
+                    </h5>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-gray-600 text-sm">Email</label>
+                            <p class="text-gray-900">
+                                {% if settings.email %}<a href="mailto:{{ settings.email }}" class="text-{{ settings.accent_color|default:'yellow-600' }} hover:underline">{{ settings.email }}</a>{% else %}—{% endif %}
+                            </p>
+                        </div>
+                        <div>
+                            <label class="text-gray-600 text-sm">Téléphone</label>
+                            <p class="text-gray-900">{{ settings.phone|default:"—" }}</p>
+                        </div>
+                        <div>
+                            <label class="text-gray-600 text-sm">WhatsApp</label>
+                            <p class="text-gray-900">{{ settings.whatsapp|default:"—" }}</p>
+                        </div>
+                        <div>
+                            <label class="text-gray-600 text-sm">Adresse</label>
+                            <p class="text-gray-900">{{ settings.address|default:"—"|linebreaks }}</p>
+                        </div>
+                        <div>
+                            <label class="text-gray-600 text-sm">Ville</label>
+                            <p class="text-gray-900">{{ settings.city|default:"—" }}</p>
+                        </div>
+                        <div>
+                            <label class="text-gray-600 text-sm">Pays</label>
+                            <p class="text-gray-900">{{ settings.country }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h5 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-share-alt mr-2" style="color: {{ settings.secondary_color|default:'#7C3AED' }};"></i>
+                        Réseaux Sociaux
+                    </h5>
+                    <div class="space-y-2">
+                        {% if settings.facebook %}
+                            <a href="{{ settings.facebook }}" target="_blank" class="w-full flex bg-gray-100 hover:bg-gray-200 text-gray-900 px-4 py-2 rounded-lg items-center">
+                                <i class="fab fa-facebook mr-2 text-{{ settings.accent_color|default:'blue-600' }}"></i> Facebook
+                            </a>
+                        {% endif %}
+                        {% if settings.instagram %}
+                            <a href="{{ settings.instagram }}" target="_blank" class="w-full flex bg-gray-100 hover:bg-gray-200 text-gray-900 px-4 py-2 rounded-lg items-center">
+                                <i class="fab fa-instagram mr-2 text-{{ settings.accent_color|default:'pink-600' }}"></i> Instagram
+                            </a>
+                        {% endif %}
+                        {% if settings.youtube %}
+                            <a href="{{ settings.youtube }}" target="_blank" class="w-full flex bg-gray-100 hover:bg-gray-200 text-gray-900 px-4 py-2 rounded-lg items-center">
+                                <i class="fab fa-youtube mr-2 text-{{ settings.accent_color|default:'red-600' }}"></i> YouTube
+                            </a>
+                        {% endif %}
+                        {% if settings.twitter %}
+                            <a href="{{ settings.twitter }}" target="_blank" class="w-full flex bg-gray-100 hover:bg-gray-200 text-gray-900 px-4 py-2 rounded-lg items-center">
+                                <i class="fab fa-twitter mr-2 text-{{ settings.accent_color|default:'sky-600' }}"></i> Twitter/X
+                            </a>
+                        {% endif %}
+                        {% if settings.website %}
+                            <a href="{{ settings.website }}" target="_blank" class="w-full flex bg-gray-100 hover:bg-gray-200 text-gray-900 px-4 py-2 rounded-lg items-center">
+                                <i class="fas fa-globe mr-2 text-{{ settings.accent_color|default:'green-600' }}"></i> Site Web
+                            </a>
+                        {% endif %}
+                        {% if not settings.facebook and not settings.instagram and not settings.youtube and not settings.twitter and not settings.website %}
+                            <p class="text-gray-500 text-center">Aucun réseau social configuré</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Personnalisation -->
+        <div class="tab-panel" id="theme" role="tabpanel">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h5 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-palette mr-2" style="color: {{ settings.primary_color|default:'#4F46E5' }};"></i>
+                            Couleurs Actuelles
+                        </h5>
+                        <a href="{% url 'settings:theme_gallery' %}" class="text-{{ settings.accent_color|default:'yellow-600' }} hover:underline text-sm flex items-center">
+                            <i class="fas fa-th mr-1"></i> Galerie de Thèmes
+                        </a>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="text-center p-4 rounded-lg" style="background-color: {{ settings.primary_color }};">
+                            <p class="text-white font-medium">Principale</p>
+                            <p class="text-white text-sm">{{ settings.primary_color }}</p>
+                        </div>
+                        <div class="text-center p-4 rounded-lg" style="background-color: {{ settings.secondary_color }};">
+                            <p class="text-white font-medium">Secondaire</p>
+                            <p class="text-white text-sm">{{ settings.secondary_color }}</p>
+                        </div>
+                        <div class="text-center p-4 rounded-lg" style="background-color: {{ settings.accent_color }};">
+                            <p class="text-white font-medium">Accent</p>
+                            <p class="text-white text-sm">{{ settings.accent_color }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h5 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-cogs mr-2" style="color: {{ settings.secondary_color|default:'#7C3AED' }};"></i>
+                        Paramètres Techniques
+                    </h5>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-gray-600 text-sm">Fuseau Horaire</label>
+                            <p class="text-gray-900">{{ settings.timezone }}</p>
+                        </div>
+                        <div>
+                            <label class="text-gray-600 text-sm">Langue</label>
+                            <p class="text-gray-900">{{ settings.get_language_display }}</p>
+                        </div>
+                        <div>
+                            <label class="text-gray-600 text-sm">Notifications WhatsApp</label>
+                            <p class="text-gray-900">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" style="background-color: {% if settings.enable_whatsapp_notifications %}{{ settings.success_color|default:'#10B981' }}{% else %}{{ settings.danger_color|default:'#EF4444' }}{% endif %}; color: white;">
+                                    {{ settings.enable_whatsapp_notifications|yesno:"Activé,Désactivé" }}
+                                </span>
+                            </p>
+                        </div>
+                        <div>
+                            <label class="text-gray-600 text-sm">Notifications Email</label>
+                            <p class="text-gray-900">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" style="background-color: {% if settings.enable_email_notifications %}{{ settings.success_color|default:'#10B981' }}{% else %}{{ settings.danger_color|default:'#EF4444' }}{% endif %}; color: white;">
+                                    {{ settings.enable_email_notifications|yesno:"Activé,Désactivé" }}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Horaires -->
+        <div class="tab-panel" id="schedule" role="tabpanel">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h5 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-clock mr-2" style="color: {{ settings.success_color|default:'#10B981' }};"></i>
+                    Horaires des Cultes
+                </h5>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="border rounded-lg p-4">
+                        <h6 class="text-{{ settings.primary_color|default:'indigo-600' }} font-medium">Dimanche</h6>
+                        <p class="text-gray-900">{{ settings.sunday_service_time|time:"H:i"|default:"—" }}</p>
+                    </div>
+                    <div class="border rounded-lg p-4">
+                        <h6 class="text-{{ settings.primary_color|default:'indigo-600' }} font-medium">Mercredi (Prière)</h6>
+                        <p class="text-gray-900">{{ settings.wednesday_service_time|time:"H:i"|default:"—" }}</p>
+                    </div>
+                    <div class="border rounded-lg p-4">
+                        <h6 class="text-{{ settings.primary_color|default:'indigo-600' }} font-medium">Vendredi (Jeunesse)</h6>
+                        <p class="text-gray-900">{{ settings.friday_service_time|time:"H:i"|default:"—" }}</p>
+                    </div>
+                </div>
+                {% if settings.custom_services %}
+                    <div class="mt-4">
+                        <h6 class="text-{{ settings.primary_color|default:'indigo-600' }} font-medium">Autres Services</h6>
+                        <p class="text-gray-900">{{ settings.custom_services|linebreaks }}</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const tabs = document.querySelectorAll('[data-tab]');
+    const panels = document.querySelectorAll('.tab-panel');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('tab-active:text-indigo-600', 'border-indigo-600'));
+            tab.classList.add('tab-active:text-{{ settings.primary_color|default:"indigo-600" }}', 'border-{{ settings.primary_color|default:"indigo-600" }}');
+
+            panels.forEach(panel => panel.classList.remove('active'));
+            document.getElementById(tab.getAttribute('data-tab')).classList.add('active');
+        });
+    });
+});
+</script>
+
+<style>
+.tab-panel {
+    display: none;
+}
+.tab-panel.active {
+    display: block;
+}
+</style>
+{% endblock %}
