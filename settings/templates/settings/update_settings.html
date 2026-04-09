@@ -1,0 +1,670 @@
+{% extends 'members/base.html' %}
+
+{% block title %}Paramètres de l'Église{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    
+    <!-- Header -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">
+                    <i class="fas fa-cog mr-3" style="color: {{ settings.primary_color|default:'#4F46E5' }}"></i>
+                    Paramètres de l'Église
+                </h1>
+                <p class="text-gray-600 mt-1">Personnalisez votre plateforme</p>
+            </div>
+            <a href="{% url 'settings:dashboard' %}" 
+               class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                <i class="fas fa-arrow-left mr-2"></i>Retour
+            </a>
+        </div>
+    </div>
+    
+    <!-- Messages -->
+    {% if messages %}
+    <div class="mb-6">
+        {% for message in messages %}
+        <div class="p-4 rounded-lg text-white {% if message.tags == 'success' %}bg-green-500{% else %}bg-red-500{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <!-- Tabs Navigation -->
+    <div class="bg-white rounded-lg shadow-md mb-6">
+        <div class="border-b">
+            <nav class="flex overflow-x-auto" id="settingsTabs">
+                <button onclick="showTab('basic')" class="tab-btn px-6 py-4 font-semibold border-b-2 border-{{ settings.primary_color|default:'blue-600' }} text-{{ settings.primary_color|default:'blue-600' }}" data-tab="basic">
+                    <i class="fas fa-info-circle mr-2"></i>Informations
+                </button>
+                <button onclick="showTab('history')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-gray-800" data-tab="history">
+                    <i class="fas fa-book mr-2"></i>Histoire
+                </button>
+                <button onclick="showTab('leadership')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-gray-800" data-tab="leadership">
+                    <i class="fas fa-user-tie mr-2"></i>Direction
+                </button>
+                <button onclick="showTab('contact')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-gray-800" data-tab="contact">
+                    <i class="fas fa-phone mr-2"></i>Contact
+                </button>
+                <button onclick="showTab('colors')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-gray-800" data-tab="colors">
+                    <i class="fas fa-palette mr-2"></i>Couleurs
+                </button>
+                <button onclick="showTab('schedule')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-gray-800" data-tab="schedule">
+                    <i class="fas fa-clock mr-2"></i>Horaires
+                </button>
+            </nav>
+        </div>
+    </div>
+    
+    <!-- Formulaire -->
+    <form method="post" enctype="multipart/form-data" id="settingsForm">
+        {% csrf_token %}
+        
+        <!-- Tab: Informations de Base -->
+        <div id="tab-basic" class="tab-content">
+            <div class="bg-white rounded-lg shadow-md p-6 space-y-6">
+                <h2 class="text-xl font-bold text-gray-800 border-b pb-3">
+                    <i class="fas fa-church mr-2"></i>Informations de Base
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Nom de l'église -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-church mr-2"></i>Nom de l'Église *
+                        </label>
+                        {{ form.church_name }}
+                        {% if form.church_name.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.church_name.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Slogan -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-quote-left mr-2"></i>Slogan/Devise
+                        </label>
+                        {{ form.slogan }}
+                        {% if form.slogan.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.slogan.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Date de fondation -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-calendar mr-2"></i>Date de Fondation
+                        </label>
+                        {{ form.founded_date }}
+                        {% if form.founded_date.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.founded_date.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Images -->
+                <div class="border-t pt-6 mt-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Images de l'Église</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Logo -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-image mr-2"></i>Logo (500x500px)
+                            </label>
+                            {% if settings.logo %}
+                            <img src="{{ settings.logo.url }}" class="w-32 h-32 object-contain mb-2 border rounded">
+                            {% endif %}
+                            {{ form.logo }}
+                            {% if form.logo.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.logo.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        
+                        <!-- Bannière -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-panorama mr-2"></i>Bannière (1920x400px)
+                            </label>
+                            {% if settings.banner %}
+                            <img src="{{ settings.banner.url }}" class="w-full h-20 object-cover mb-2 border rounded">
+                            {% endif %}
+                            {{ form.banner }}
+                            {% if form.banner.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.banner.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab: Histoire -->
+        <div id="tab-history" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow-md p-6 space-y-6">
+                <h2 class="text-xl font-bold text-gray-800 border-b pb-3">
+                    <i class="fas fa-book mr-2"></i>Histoire & Vision
+                </h2>
+                
+                <div class="space-y-6">
+                    <!-- Histoire -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-history mr-2"></i>Histoire de l'Église
+                        </label>
+                        {{ form.history }}
+                        {% if form.history.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.history.errors.0 }}</p>
+                        {% endif %}
+                        <p class="text-sm text-gray-500 mt-1">Racontez l'histoire de votre église</p>
+                    </div>
+                    
+                    <!-- Vision -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-eye mr-2"></i>Vision
+                        </label>
+                        {{ form.vision }}
+                        {% if form.vision.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.vision.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Mission -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-crosshairs mr-2"></i>Mission
+                        </label>
+                        {{ form.mission }}
+                        {% if form.mission.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.mission.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Valeurs -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-heart mr-2"></i>Valeurs Fondamentales
+                        </label>
+                        {{ form.core_values }}
+                        {% if form.core_values.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.core_values.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab: Direction -->
+        <div id="tab-leadership" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow-md p-6 space-y-6">
+                <h2 class="text-xl font-bold text-gray-800 border-b pb-3">
+                    <i class="fas fa-user-tie mr-2"></i>Direction Actuelle
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Pasteur principal -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-user-circle mr-2"></i>Pasteur Principal
+                        </label>
+                        {{ form.current_pastor }}
+                        {% if form.current_pastor.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.current_pastor.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Date de fonction -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-calendar-check mr-2"></i>Pasteur depuis
+                        </label>
+                        {{ form.pastor_since }}
+                        {% if form.pastor_since.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.pastor_since.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Photo du pasteur -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-camera mr-2"></i>Photo du Pasteur
+                        </label>
+                        {% if settings.pastor_photo %}
+                        <img src="{{ settings.pastor_photo.url }}" class="w-32 h-32 object-cover rounded-full mb-2">
+                        {% endif %}
+                        {{ form.pastor_photo }}
+                        {% if form.pastor_photo.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.pastor_photo.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Biographie -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-file-alt mr-2"></i>Biographie du Pasteur
+                        </label>
+                        {{ form.pastor_bio }}
+                        {% if form.pastor_bio.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.pastor_bio.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Équipe de direction -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-users mr-2"></i>Équipe de Direction
+                        </label>
+                        {{ form.leadership_team }}
+                        {% if form.leadership_team.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.leadership_team.errors.0 }}</p>
+                        {% endif %}
+                        <p class="text-sm text-gray-500 mt-1">Un responsable par ligne</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab: Contact -->
+        <div id="tab-contact" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow-md p-6 space-y-6">
+                <h2 class="text-xl font-bold text-gray-800 border-b pb-3">
+                    <i class="fas fa-phone mr-2"></i>Informations de Contact
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Email -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-envelope mr-2"></i>Email Principal
+                        </label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.email.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Téléphone -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-phone mr-2"></i>Téléphone
+                        </label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.phone.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- WhatsApp -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fab fa-whatsapp mr-2"></i>WhatsApp
+                        </label>
+                        {{ form.whatsapp }}
+                        {% if form.whatsapp.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.whatsapp.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Ville -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-city mr-2"></i>Ville
+                        </label>
+                        {{ form.city }}
+                        {% if form.city.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.city.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Adresse -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-map-marker-alt mr-2"></i>Adresse Complète
+                        </label>
+                        {{ form.address }}
+                        {% if form.address.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.address.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Pays -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-flag mr-2"></i>Pays
+                        </label>
+                        {{ form.country }}
+                        {% if form.country.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.country.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Réseaux sociaux -->
+                <div class="border-t pt-6 mt-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Réseaux Sociaux</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fab fa-facebook mr-2"></i>Facebook
+                            </label>
+                            {{ form.facebook }}
+                            {% if form.facebook.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.facebook.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fab fa-instagram mr-2"></i>Instagram
+                            </label>
+                            {{ form.instagram }}
+                            {% if form.instagram.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.instagram.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fab fa-youtube mr-2"></i>YouTube
+                            </label>
+                            {{ form.youtube }}
+                            {% if form.youtube.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.youtube.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fab fa-twitter mr-2"></i>Twitter/X
+                            </label>
+                            {{ form.twitter }}
+                            {% if form.twitter.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.twitter.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-globe mr-2"></i>Site Web
+                            </label>
+                            {{ form.website }}
+                            {% if form.website.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.website.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab: Couleurs -->
+        <div id="tab-colors" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow-md p-6 space-y-6">
+                <h2 class="text-xl font-bold text-gray-800 border-b pb-3">
+                    <i class="fas fa-palette mr-2"></i>Personnalisation des Couleurs
+                </h2>
+                
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+                    <p class="text-sm text-blue-800">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        Ces couleurs seront appliquées sur toute la plateforme. 
+                        <a href="{% url 'settings:theme_gallery' %}" class="font-semibold underline">Voir les thèmes pré-définis</a>
+                    </p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Couleur principale -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Couleur Principale
+                        </label>
+                        <div class="flex items-center gap-3">
+                            {{ form.primary_color }}
+                            {% if form.primary_color.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.primary_color.errors.0 }}</p>
+                            {% endif %}
+                            <div class="w-12 h-12 rounded-lg border-2 preview-primary" 
+                                 style="background-color: {{ settings.primary_color }}"></div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Navigation, boutons principaux</p>
+                    </div>
+                    
+                    <!-- Couleur secondaire -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Couleur Secondaire
+                        </label>
+                        <div class="flex items-center gap-3">
+                            {{ form.secondary_color }}
+                            {% if form.secondary_color.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.secondary_color.errors.0 }}</p>
+                            {% endif %}
+                            <div class="w-12 h-12 rounded-lg border-2 preview-secondary" 
+                                 style="background-color: {{ settings.secondary_color }}"></div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">En-têtes, gradients</p>
+                    </div>
+                    
+                    <!-- Couleur d'accent -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Couleur d'Accent
+                        </label>
+                        <div class="flex items-center gap-3">
+                            {{ form.accent_color }}
+                            {% if form.accent_color.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.accent_color.errors.0 }}</p>
+                            {% endif %}
+                            <div class="w-12 h-12 rounded-lg border-2 preview-accent" 
+                                 style="background-color: {{ settings.accent_color }}"></div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Éléments importants</p>
+                    </div>
+                    
+                    <!-- Couleur succès -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Couleur de Succès
+                        </label>
+                        <div class="flex items-center gap-3">
+                            {{ form.success_color }}
+                            {% if form.success_color.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.success_color.errors.0 }}</p>
+                            {% endif %}
+                            <div class="w-12 h-12 rounded-lg border-2" 
+                                 style="background-color: {{ settings.success_color }}"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Couleur danger -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Couleur de Danger
+                        </label>
+                        <div class="flex items-center gap-3">
+                            {{ form.danger_color }}
+                            {% if form.danger_color.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.danger_color.errors.0 }}</p>
+                            {% endif %}
+                            <div class="w-12 h-12 rounded-lg border-2" 
+                                 style="background-color: {{ settings.danger_color }}"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Couleur warning -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Couleur d'Avertissement
+                        </label>
+                        <div class="flex items-center gap-3">
+                            {{ form.warning_color }}
+                            {% if form.warning_color.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.warning_color.errors.0 }}</p>
+                            {% endif %}
+                            <div class="w-12 h-12 rounded-lg border-2" 
+                                 style="background-color: {{ settings.warning_color }}"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Aperçu -->
+                <div class="border-t pt-6 mt-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Aperçu</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <button type="button" class="px-4 py-3 rounded-lg text-white font-semibold preview-btn-primary" 
+                                style="background-color: {{ settings.primary_color }}">
+                            Bouton Principal
+                        </button>
+                        <button type="button" class="px-4 py-3 rounded-lg text-white font-semibold preview-btn-secondary" 
+                                style="background-color: {{ settings.secondary_color }}">
+                            Bouton Secondaire
+                        </button>
+                        <button type="button" class="px-4 py-3 rounded-lg text-white font-semibold preview-btn-accent" 
+                                style="background-color: {{ settings.accent_color }}">
+                            Bouton Accent
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab: Horaires -->
+        <div id="tab-schedule" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow-md p-6 space-y-6">
+                <h2 class="text-xl font-bold text-gray-800 border-b pb-3">
+                    <i class="fas fa-clock mr-2"></i>Horaires des Cultes
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-church mr-2"></i>Culte Dimanche
+                        </label>
+                        {{ form.sunday_service_time }}
+                        {% if form.sunday_service_time.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.sunday_service_time.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-praying-hands mr-2"></i>Prière Mercredi
+                        </label>
+                        {{ form.wednesday_service_time }}
+                        {% if form.wednesday_service_time.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.wednesday_service_time.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-users mr-2"></i>Jeunesse Vendredi
+                        </label>
+                        {{ form.friday_service_time }}
+                        {% if form.friday_service_time.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.friday_service_time.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-list mr-2"></i>Autres Services
+                    </label>
+                    {{ form.custom_services }}
+                    {% if form.custom_services.errors %}
+                    <p class="text-red-600 text-sm mt-1">{{ form.custom_services.errors.0 }}</p>
+                    {% endif %}
+                    <p class="text-sm text-gray-500 mt-1">Un service par ligne</p>
+                </div>
+            </div>
+        </div>
+        
+
+        {% if form.errors %}
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            <strong>Le formulaire contient des erreurs :</strong>
+            <ul class="list-disc pl-6">
+                {% for field, errors in form.errors.items %}
+                    <li><strong>{{ field }} :</strong> {{ errors|join:", " }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        <!-- Boutons de sauvegarde (visibles sur tous les tabs) -->
+        <div class="bg-white rounded-lg shadow-md p-6 mt-6 sticky bottom-0">
+            <div class="flex justify-end gap-4">
+                <a href="{% url 'settings:dashboard' %}" 
+                   class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                    <i class="fas fa-times mr-2"></i>Annuler
+                </a>
+                <button type="submit" 
+                        class="px-6 py-3 rounded-lg text-white font-semibold transition"
+                        style="background-color: {{ settings.primary_color|default:'#4F46E5' }}; hover:opacity-90">
+                    <i class="fas fa-save mr-2"></i>Enregistrer les Modifications
+                </button>
+            </div>
+        </div>
+    </form>
+    
+</div>
+
+<script>
+// Gestion des tabs
+function showTab(tabName) {
+    // Masquer tous les contenus
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+    });
+    
+    // Réinitialiser tous les boutons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('border-blue-600', 'text-blue-600');
+        btn.classList.add('text-gray-600');
+    });
+    
+    // Afficher le contenu sélectionné
+    document.getElementById('tab-' + tabName).classList.remove('hidden');
+    
+    // Activer le bouton
+    const activeBtn = document.querySelector(`[data-tab="${tabName}"]`);
+    activeBtn.classList.add('border-{{ settings.primary_color|default:"blue-600" }}', 'text-{{ settings.primary_color|default:"blue-600" }}');
+    activeBtn.classList.remove('text-gray-600');
+}
+
+// Aperçu des couleurs en temps réel
+document.querySelectorAll('input[type="color"]').forEach(input => {
+    input.addEventListener('change', function() {
+        const color = this.value;
+        const fieldName = this.name;
+        
+        // Mettre à jour les aperçus
+        if (fieldName === 'primary_color') {
+            document.querySelectorAll('.preview-primary, .preview-btn-primary').forEach(el => {
+                el.style.backgroundColor = color;
+            });
+            document.querySelector('button[type="submit"]').style.backgroundColor = color;
+        } else if (fieldName === 'secondary_color') {
+            document.querySelectorAll('.preview-secondary, .preview-btn-secondary').forEach(el => {
+                el.style.backgroundColor = color;
+            });
+        } else if (fieldName === 'accent_color') {
+            document.querySelectorAll('.preview-accent, .preview-btn-accent').forEach(el => {
+                el.style.backgroundColor = color;
+            });
+        }
+    });
+});
+
+// Charger le premier tab par défaut
+document.addEventListener('DOMContentLoaded', () => {
+    showTab('basic');
+});
+</script>
+{% endblock %}
